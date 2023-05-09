@@ -6,7 +6,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const userRoutes = require('./routes/userRoutes')
-
+const playlistsRoutes = require('./routes/playlistsRoutes')
 
 //creamos el servidor con express
 const app = express();
@@ -19,7 +19,7 @@ app.use(cors());
 
 // colocar rutas
 app.get("/", (req, res) => { res.send('proyecto final Senpai') });
-app.use("/api", userRoutes);
+app.use("/api", userRoutes, playlistsRoutes);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
