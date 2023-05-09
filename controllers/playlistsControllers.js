@@ -1,6 +1,5 @@
 const knex = require("../config/knexFile");
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
+
 
 
 exports.showPlaylistsId = async (req, res) => {
@@ -33,3 +32,17 @@ exports.showPlaylistSongs = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
+exports.showAllSongs = async (req, res) => {
+    try {
+        const resultado = await knex.select("*")
+            .from("songs")
+        if (resultado.length === 0) {
+            return res.status(200).json(`No se han encontrado canciones`);
+        }
+        return res.status(200).json(resultado);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+

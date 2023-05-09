@@ -2,19 +2,37 @@ const knex = require("../config/knexFile");
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
-exports.signup = async (req, res) => {
+exports.emailCheck = async (req, res) => {
     try {
-        console.log('ggg')
-        const { name, email, password, user_name } = req.body;
-        //encriptamos la password
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
+        const { email } = req.body;
 
         //corroborar que el usuario no existe, si no existe agregarlo
         const resultado = await knex("users").where({ email: email });
         if (resultado.length) {
             return res.status(400).json({ error: "El usuario ya se encuentra registrado" });
+        } else {
+            return res.status(200).json({ message: "El usuario no se encuentra registrado" });
         }
+
+
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+
+}
+
+exports.signup = async (req, res) => {
+    try {
+        const { name, email, password, user_name } = req.body;
+        //encriptamos la password
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        /*  //corroborar que el usuario no existe, si no existe agregarlo
+         const resultado = await knex("users").where({ email: email });
+         if (resultado.length) {
+             return res.status(400).json({ error: "El usuario ya se encuentra registrado" });
+         } */
 
         await knex('users').insert({
             email: email,
@@ -32,7 +50,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, name, password } = req.body;
-        const resultado = await knex("users ").where({ email: email })
+        const resultado = await knex("users ").where({ email: email }) //cambiar para que también busque por user_name
         if (!resultado.length) {
             return res.status(404).json({ error: "el usuario no se encuentra registrado" })
         }
@@ -44,6 +62,8 @@ exports.login = async (req, res) => {
         const payload = {
             name: resultado[0].name,
             email: resultado[0].email,
+            user_name: resultado[0].user_name,
+            image: resultado[0].image
 
         }
         const secret = process.env.TOKEN_SECRET
