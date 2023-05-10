@@ -23,20 +23,20 @@ exports.emailCheck = async (req, res) => {
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, user_name } = req.body;
+        const { email, password, user_name } = req.body;
         //encriptamos la password
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
 
-        /*  //corroborar que el usuario no existe, si no existe agregarlo
-         const resultado = await knex("users").where({ email: email });
-         if (resultado.length) {
-             return res.status(400).json({ error: "El usuario ya se encuentra registrado" });
-         } */
+        //corroborar que el usuario no existe, si no existe agregarlo
+        const resultado = await knex("users").where({ email: email });
+        if (resultado.length) {
+            return res.status(400).json({ error: "El usuario ya se encuentra registrado" });
+        }
 
         await knex('users').insert({
             email: email,
-            name: name,
+            name: user_name,
             user_name: user_name,
             password: hash
         });
@@ -59,6 +59,8 @@ exports.login = async (req, res) => {
             return res.status(400).json({ error: "Email y/o contraseña incorrectos" })
         }
         //crear JWT token y dárselo al cliente
+        delete resultado[0].password; // eliminamos la propiedad password del objeto resultado
+
         const payload = {
             name: resultado[0].name,
             email: resultado[0].email,
@@ -68,7 +70,11 @@ exports.login = async (req, res) => {
         }
         const secret = process.env.TOKEN_SECRET
         const token = jwt.sign(payload, secret)
-        res.status(200).json({ mensaje: "el usuario ha ingresado correctamente", token: token })
+        res.status(200).json({
+            mensaje: "el usuario ha ingresado correctamente", token: token,
+            name: name, email: email, user: resultado[0]
+
+        })
     }
 
     catch (error) {
