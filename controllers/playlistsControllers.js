@@ -10,7 +10,7 @@ exports.showPlaylistsId = async (req, res) => {
             .innerJoin("playlists", "playlists_users.playlist_id", "=", "playlists.id")
             .where({ user_id: id });
         if (resultado.length === 0) {
-            return res.status(200).json(`No se ha encontrado ninguna playlist del usuario con id ${id}`);
+            return res.status(200).json({ error: 'no se han encontrado playlists del usuario' });
         }
         return res.status(200).json(resultado);
     } catch (error) {
@@ -20,18 +20,24 @@ exports.showPlaylistsId = async (req, res) => {
 exports.showPlaylistSongs = async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const resultado = await knex.select("*")
+        const resultado = await knex.select(
+            "songs.*",
+            "albums.image"
+        )
             .from("playlists_songs")
             .innerJoin("songs", "playlists_songs.song_id", "=", "songs.id")
+            .innerJoin("albums", "songs.album_id", "=", "albums.id")
             .where({ playlist_id: id });
         if (resultado.length === 0) {
-            return res.status(200).json(`No se ha encontrado ninguna playlist con id ${id}`);
+            return res
+                .status(200)
+                .json(`No se ha encontrado ninguna playlist con id ${id}`);
         }
         return res.status(200).json(resultado);
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
-}
+};
 
 exports.showAllSongs = async (req, res) => {
     try {
@@ -55,14 +61,16 @@ agregar una playlist a partir del id de las canciones:
 
 exports.addPlaylist = async (req, res) => {
     try {
+        //registro en la tabla playlists
         const { name, user_id, songs_id } = req.body;
         await knex('playlists')
             .insert({
                 name: name
             })
 
+        //obtener el id de la playlist
         const playlist = await knex.select('*').from('playlists').orderBy('id', 'desc').limit(1);
-        const playlist_id = playlist.id
+        const playlist_id = playlist[0].id
 
         //vincula la playlist agregada con el usuario
         await knex('playlists_users')
@@ -79,7 +87,7 @@ exports.addPlaylist = async (req, res) => {
             });
         });
 
-        res.status(200).json({ 'Se agregó la playlist': playlist, 'por el usuario con id': user_id })
+        res.status(200).json({ 'playlist': playlist, 'user_id': user_id })
         //       res.status(200).json({ inmuebles: inmuebles })
     }
     catch (error) {
