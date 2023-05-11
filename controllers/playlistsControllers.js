@@ -46,3 +46,43 @@ exports.showAllSongs = async (req, res) => {
     }
 }
 
+/*
+agregar una playlist a partir del id de las canciones:
+1) agregar un registro a la tabla playlists: name, duration(null)
+2)agregar un registro a la tabla playlists_users: playlist_id, user_id
+3)agregar, POR CADA CANCIÓN un registro a la tabla playlists_songs: song_id,playlist_id
+*/
+
+exports.addPlaylist = async (req, res) => {
+    try {
+        const { name, user_id, songs_id } = req.body;
+        await knex('playlists')
+            .insert({
+                name: name
+            })
+
+        const playlist = await knex.select('*').from('playlists').orderBy('id', 'desc').limit(1);
+        const playlist_id = playlist.id
+
+        //vincula la playlist agregada con el usuario
+        await knex('playlists_users')
+            .insert({
+                playlist_id: playlist_id,
+                user_id: user_id
+            })
+
+        //Recorrer el array de id 'songs_id' y hacer un insert en la tabla playlists_songs
+        songs_id.forEach(async (song_id) => {
+            await knex('playlists_songs').insert({
+                playlist_id: playlist_id,
+                song_id: song_id
+            });
+        });
+
+        res.status(200).json({ 'Se agregó la playlist': playlist, 'por el usuario con id': user_id })
+        //       res.status(200).json({ inmuebles: inmuebles })
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}

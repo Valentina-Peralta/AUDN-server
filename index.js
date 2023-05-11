@@ -8,6 +8,7 @@ require("dotenv").config();
 const userRoutes = require('./routes/userRoutes')
 const playlistsRoutes = require('./routes/playlistsRoutes')
 const reproductionRoutes = require('./routes/reproductionRoutes')
+const artistsRoutes = require('./routes/artistsRoutes')
 
 //creamos el servidor con express
 const app = express();
@@ -20,7 +21,7 @@ app.use(cors());
 
 // colocar rutas
 app.get("/", (req, res) => { res.send('proyecto final Senpai') });
-app.use("/api", userRoutes, playlistsRoutes, reproductionRoutes);
+app.use("/api", userRoutes, playlistsRoutes, reproductionRoutes, artistsRoutes);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
