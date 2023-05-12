@@ -3,7 +3,8 @@ const knex = require("../config/knexFile");
 exports.seeAllArtists = async (req, res) => {
     try {
         const artists = await knex.select('*').from('artists');
-        res.status(200).json({ artists: artists })
+        res.status(200).json(artists)
+
     }
     catch (error) {
         res.status(400).json({ error: error.message })

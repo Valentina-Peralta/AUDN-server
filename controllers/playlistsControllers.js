@@ -22,11 +22,13 @@ exports.showPlaylistSongs = async (req, res) => {
         const id = Number(req.params.id);
         const resultado = await knex.select(
             "songs.*",
-            "albums.image"
+            "albums.image",
+            "playlists.name as playlist_name"
         )
             .from("playlists_songs")
             .innerJoin("songs", "playlists_songs.song_id", "=", "songs.id")
             .innerJoin("albums", "songs.album_id", "=", "albums.id")
+            .innerJoin("playlists", "playlists_songs.playlist_id", "=", "playlists.id")
             .where({ playlist_id: id });
         if (resultado.length === 0) {
             return res
@@ -86,6 +88,34 @@ exports.addPlaylist = async (req, res) => {
                 song_id: song_id
             });
         });
+
+        res.status(200).json({ 'playlist': playlist, 'user_id': user_id })
+        //       res.status(200).json({ inmuebles: inmuebles })
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+exports.addEmptyPlaylist = async (req, res) => {
+    try {
+        //registro en la tabla playlists
+        const { name, user_id } = req.body;
+        await knex('playlists')
+            .insert({
+                name: name
+            })
+
+        //obtener el id de la playlist
+        const playlist = await knex.select('*').from('playlists').orderBy('id', 'desc').limit(1);
+        const playlist_id = playlist[0].id
+
+        //vincula la playlist agregada con el usuario
+        await knex('playlists_users')
+            .insert({
+                playlist_id: playlist_id,
+                user_id: user_id
+            })
+
 
         res.status(200).json({ 'playlist': playlist, 'user_id': user_id })
         //       res.status(200).json({ inmuebles: inmuebles })
