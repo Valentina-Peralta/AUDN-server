@@ -39,4 +39,23 @@ exports.seeTop20id = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+exports.seeTop20Global = async (req, res) => {
+    try {
+
+        const resultado = await knex
+            .select('songs.*', 'albums.name as album_name', 'albums.image as album_image', 'artists.name as artist_name')
+            .from('songs')
+            .innerJoin('reproductions', 'songs.id', 'reproductions.song_id')
+            .innerJoin('albums', 'songs.album_id', 'albums.id')
+            .innerJoin('artists', 'albums.artist_id', 'artists.id')
+            .groupBy('songs.id', 'albums.name', 'albums.image', 'artists.name')
+            .orderBy(knex.raw('COUNT(*)'), 'desc')
+            .limit(20);
+
+
+        return res.status(200).json(resultado);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
 

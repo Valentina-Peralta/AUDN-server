@@ -65,7 +65,9 @@ exports.login = async (req, res) => {
             name: resultado[0].name,
             email: resultado[0].email,
             user_name: resultado[0].user_name,
-            image: resultado[0].image
+            image: resultado[0].image,
+            cupid: resultado[0].cupid,
+            contextual: resultado[0].contextual,
 
         }
         const secret = process.env.TOKEN_SECRET
@@ -81,4 +83,60 @@ exports.login = async (req, res) => {
         res.status(400).json({ error: error.message })
     }
 
+}
+
+exports.seeCupid = async (req, res) => {
+    try {
+        const user_id = parseInt(req.body.user_id);
+
+        const resultado = await knex('users')
+            .select('cupid')
+            .where('id', user_id)
+            .first();
+
+        return res.status(200).json(resultado);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+exports.seeContextual = async (req, res) => {
+    try {
+        const user_id = parseInt(req.body.user_id);
+
+        const resultado = await knex('users')
+            .select('contextual')
+            .where('id', user_id)
+            .first();
+
+        return res.status(200).json(resultado);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+exports.updateCupid = async (req, res) => {
+    try {
+        const userId = req.body.user_id;
+        const newCupidValue = req.body.cupid_value;
+        const updatedUser = await knex('users')
+            .where('id', userId)
+            .update({ cupid: newCupidValue }, ['id', 'name', 'email', 'cupid']);
+
+        return res.status(200).json(updatedUser);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+exports.updateContextual = async (req, res) => {
+    try {
+        const userId = req.body.user_id;
+        const newContextualValue = req.body.contextual_value;
+        const updatedUser = await knex('users')
+            .where('id', userId)
+            .update({ contextual: newContextualValue }, ['id', 'name', 'email', 'contxtual']);
+
+        return res.status(200).json(updatedUser);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
 }
