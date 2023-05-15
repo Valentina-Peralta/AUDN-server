@@ -172,3 +172,15 @@ exports.seeUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+exports.addFriend = async (req, res) => {
+    try {
+        const { user1_id, user2_id } = req.body;
+
+        await knex('relationships').insert({ user1_id, user2_id });
+
+        return res.status(200).json({ message: 'Relationship added successfully' });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
