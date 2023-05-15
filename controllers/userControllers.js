@@ -140,3 +140,35 @@ exports.updateContextual = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
+
+exports.seeFriends = async (req, res) => {
+    try {
+        const user1Id = req.body.user_id;
+        const friends = await knex('relationships')
+            .select('users.*')
+            .join('users', 'users.id', 'relationships.user2_id')
+            .where('relationships.user1_id', user1Id);
+
+        res.status(200).json(friends);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.seeUsers = async (req, res) => {
+    try {
+        const searchTerm = req.body.searchTerm?.trim();
+
+        const users = await knex('users')
+            .select('*')
+            .whereRaw(
+                `LOWER(email) LIKE ? OR LOWER(name) LIKE ? OR LOWER(user_name) LIKE ?`,
+                [`%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`]
+            );
+
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

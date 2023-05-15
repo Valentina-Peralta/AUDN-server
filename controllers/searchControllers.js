@@ -27,7 +27,7 @@ exports.searchSongs = async (req, res) => {
 }
 
 
-exports.showSongsByGender = async (req, res) => {
+exports.showSongsByGenre = async (req, res) => {
     try {
         const { gender } = req.body;
         const resultado = await knex('songs')

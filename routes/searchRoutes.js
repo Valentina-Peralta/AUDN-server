@@ -1,7 +1,7 @@
 const express = require("express");
-const { searchSongs, showSongsByGender } = require("../controllers/searchControllers");
+const { searchSongs, showSongsByGenre } = require("../controllers/searchControllers");
 const routes = express.Router();
 
 routes.post('/songs/search', searchSongs)
-routes.post('/songs/searchByGender', showSongsByGender)
+routes.post('/songs/searchByGenre', showSongsByGenre)
 module.exports = routes;
