@@ -159,19 +159,24 @@ exports.seeFriends = async (req, res) => {
 exports.seeUsers = async (req, res) => {
     try {
         const searchTerm = req.body.searchTerm?.trim();
+        const excludedUserId = req.body.excludedUserId;
 
         const users = await knex('users')
             .select('*')
-            .whereRaw(
-                `LOWER(email) LIKE ? OR LOWER(name) LIKE ? OR LOWER(user_name) LIKE ?`,
-                [`%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`]
-            );
+            .whereNot('id', excludedUserId)
+            .andWhere(function () {
+                this.whereRaw(
+                    `LOWER(email) LIKE ? OR LOWER(name) LIKE ? OR LOWER(user_name) LIKE ?`,
+                    [`%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`, `%${searchTerm.toLowerCase()}%`]
+                );
+            });
 
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 exports.addFriend = async (req, res) => {
     try {
