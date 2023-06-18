@@ -4,12 +4,12 @@ const knex = require("../config/knexFile");
 exports.searchSongs = async (req, res) => {
     try {
         const searchTerm = req.body.searchTerm?.trim();
-
+        //orderby songs.name artists.name?
         const songs = await knex('songs')
             .select('songs.name as song_name', 'songs.id as song_id', 'albums.image as album_image', 'albums.name as album_name', 'artists.name as artist_name')
             .join('albums', 'songs.album_id', 'albums.id')
             .join('artists', 'albums.artist_id', 'artists.id')
-            .whereRaw(`LOWER(songs.name) LIKE ?`, `%${searchTerm.toLowerCase()}%`);
+            .whereRaw(`LOWER(songs.name) LIKE ?`, `%${searchTerm.toLowerCase()}%`)
 
         const albums = await knex('songs')
             .select('songs.name as song_name', 'songs.id as song_id', 'albums.image as album_image', 'albums.name as album_name', 'artists.name as artist_name')
